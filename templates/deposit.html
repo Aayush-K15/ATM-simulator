@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Deposit</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        .options-btn {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .options-btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Deposit Money</h1>
+    <form method="post" action="/process_deposit">
+        <input type="number" name="amount" placeholder="Amount" required><br>
+        <button type="submit">Submit</button>
+    </form>
+    <div class="container"> 
+        <form action="/options" method="get">
+            <button type="submit" class="options-btn">Go To Options</button>
+        </form>
+        </div>
+</body>
+</html>
