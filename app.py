@@ -3,14 +3,11 @@ import mysql.connector as sql
 
 app = Flask(__name__)
 
-# Set a secret key for session management
 app.secret_key = 'your_secret_key'
 
-# Database connection
 conn = sql.connect(host='localhost', user='root', password='12345678', database='ATM_MACHINE')
 c1 = conn.cursor()
 
-# Function to check if user exists
 def user_exists(username, password):
     c1.execute("SELECT * FROM records WHERE ACCONT_NO = %s AND Password = %s", (username, password))
     user = c1.fetchone()
@@ -31,14 +28,13 @@ def login():
     else:
         return render_template('login.html', message='Invalid username or password')
 
-# Route for creating a new account
 @app.route('/create_account', methods=['POST'])
 def create_account():
     username = request.form.get('username')
     password = request.form.get('password')
-    name = request.form.get('name')  # Assuming you have a field for name in your form
+    name = request.form.get('name')  
 
-    # Check if any of the required fields are empty
+    
     if not username or not password or not name:
         return jsonify({'error': 'All fields are required'}), 400
 
@@ -51,21 +47,17 @@ def create_account():
         return redirect('/deposit')
 
 
-# Route for showing options
 @app.route('/options')
 def options():
     if 'username' in session:
-        # Fetch the user's name from the database
         username = session['username']
         c1.execute("SELECT NAME FROM records WHERE ACCONT_NO = %s", (username,))
         user_name = c1.fetchone()[0]
 
-        # Render the options template with welcome message and user's name
         return render_template('options.html', welcome_message='Welcome', name=user_name)
     else:
         return redirect('/')
 
-# Route for depositing money
 @app.route('/deposit')
 def deposit():
     if 'username' in session:
@@ -73,7 +65,6 @@ def deposit():
     else:
         return redirect('/')
 
-# Route for processing deposit
 @app.route('/process_deposit', methods=['POST'])
 def process_deposit():
     if 'username' in session:
@@ -92,7 +83,6 @@ def process_deposit():
     else:
         return redirect('/')
 
-# Route for withdrawing money
 @app.route('/withdraw')
 def withdraw():
     if 'username' in session:
@@ -100,7 +90,6 @@ def withdraw():
     else:
         return redirect('/')
 
-# Route for processing withdrawal
 @app.route('/process_withdraw', methods=['POST'])
 def process_withdraw():
     if 'username' in session:
@@ -122,7 +111,6 @@ def process_withdraw():
     else:
         return redirect('/')
 
-# Route for checking balance
 @app.route('/check_balance')
 def check_balance():
     if 'username' in session:
@@ -135,7 +123,6 @@ def check_balance():
     else:
         return redirect('/')
 
-# Route for transferring money
 @app.route('/transfer')
 def transfer():
     if 'username' in session:
@@ -143,7 +130,6 @@ def transfer():
     else:
         return redirect('/')
 
-# Route for processing transfer
 @app.route('/process_transfer', methods=['POST'])
 def process_transfer():
     if 'username' in session:
@@ -151,7 +137,7 @@ def process_transfer():
         recipient = request.form.get('recipient')
         sender = session['username']
 
-        # Query sender's balance
+        
         c1.execute("SELECT BALANCE FROM records WHERE ACCONT_NO = %s", (sender,))
         sender_balance = c1.fetchone()
         if sender_balance is None:
@@ -159,7 +145,7 @@ def process_transfer():
 
         sender_balance = sender_balance[0]
 
-        # Query recipient's balance
+        
         c1.execute("SELECT BALANCE FROM records WHERE ACCONT_NO = %s", (recipient,))
         recipient_balance = c1.fetchone()
         if recipient_balance is None:
@@ -167,15 +153,15 @@ def process_transfer():
 
         recipient_balance = recipient_balance[0]
 
-        # Check if sender has sufficient balance
+       
         if amount > sender_balance:
             return render_template('error.html', message='Insufficient balance')
 
-        # Update sender's balance
+       
         sender_new_balance = sender_balance - amount
         c1.execute("UPDATE records SET BALANCE = %s WHERE ACCONT_NO = %s", (sender_new_balance, sender))
 
-        # Update recipient's balance
+       
         recipient_new_balance = recipient_balance + amount
         c1.execute("UPDATE records SET BALANCE = %s WHERE ACCONT_NO = %s", (recipient_new_balance, recipient))
 
@@ -186,7 +172,6 @@ def process_transfer():
         return redirect('/')
 
 
-# Route for changing account number
 @app.route('/change_account_number')
 def change_account_number():
     if 'username' in session:
@@ -194,7 +179,6 @@ def change_account_number():
     else:
         return redirect('/')
 
-# Route for processing change account number
 @app.route('/process_change_account_number', methods=['POST'])
 def process_change_account_number():
     if 'username' in session:
@@ -204,11 +188,10 @@ def process_change_account_number():
         c1.execute("UPDATE records SET ACCONT_NO = %s WHERE ACCONT_NO = %s", (new_account_number, username))
         conn.commit()
 
-        return render_template('transaction_success.html', message='Account number changed successfully')
+        return render_template('transaction_success_acct.html', message='Account number changed successfully')
     else:
         return redirect('/')
 
-# Route for logging out
 @app.route('/logout', methods=['GET', 'POST'])
 def logout():
     session.pop('username', None)
